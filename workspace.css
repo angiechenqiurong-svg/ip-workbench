@@ -36,6 +36,12 @@ button { font: inherit; color: inherit; cursor: pointer; }
 .connect:hover:not(:disabled) { background: #852e20; }
 .connect:disabled { opacity: .68; cursor: wait; }
 .original { display: inline-flex; margin-left: 12px; color: var(--muted); text-underline-offset: 3px; }
+.workspace-content .pending-frame { display: grid; grid-template-rows: auto minmax(0, 1fr); }
+.pending-frame .connection { height: auto; padding: 8px 18px; background: var(--surface); }
+.pending-frame .connection-copy { display: flex; align-items: center; justify-content: center; gap: 12px; width: auto; padding: 0; border: 0; }
+.pending-frame .connection-copy h2 { display: none; }
+.pending-frame .connection-copy p { margin: 0; }
+.pending-frame .connect { min-height: 36px; flex: none; }
 @media (max-width: 560px) {
   .workspace-bar { display: grid; grid-template-columns: minmax(0, 1fr); gap: 2px; padding: 9px 12px 0; }
   .workspace-tabs { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0; }

@@ -51,6 +51,10 @@ function attach(name, url) {
   const connection = connections.get(name);
   clearTimeout(connection.timer);
   connection.timer = setTimeout(() => reportFailure(name), 12000);
+  if (name === 'accounts') {
+    connection.placeholder.closest('[role="tabpanel"]').classList.add('pending-frame');
+    connection.frame.hidden = false;
+  }
   connection.frame.src = url;
 }
 
@@ -95,6 +99,7 @@ window.addEventListener('message', event => {
   const connection = connections.get(name);
   if (!connection || event.source !== connection.frame.contentWindow) return;
   clearTimeout(connection.timer);
+  connection.placeholder.closest('[role="tabpanel"]').classList.remove('pending-frame');
   connection.placeholder.hidden = true;
   connection.frame.hidden = false;
 });

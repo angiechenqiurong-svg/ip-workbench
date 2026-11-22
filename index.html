@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>IP工作台</title>
+  <link rel="icon" href="./favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="./workspace.css">
+  <script type="module" src="./workspace.mjs"></script>
+</head>
+<body>
+  <header class="workspace-bar">
+    <h1 class="wordmark"><span class="wordmark-icon" aria-hidden="true">IP</span>IP工作台</h1>
+    <nav class="workspace-tabs" role="tablist" aria-label="创作工具">
+      <button type="button" id="accounts-tab" role="tab" aria-controls="accounts" aria-selected="false" tabindex="-1">对标账号库</button>
+      <button type="button" id="video-tab" role="tab" aria-controls="video" aria-selected="false" tabindex="-1">爆款拆解</button>
+      <button type="button" id="story-tab" role="tab" aria-controls="story" aria-selected="true">分镜台</button>
+    </nav>
+  </header>
+  <main class="workspace-content">
+    <section id="accounts" role="tabpanel" aria-labelledby="accounts-tab" hidden>
+      <div class="connection" data-connection>
+        <div class="connection-copy">
+          <h2>连接对标账号库</h2>
+          <p role="status">工作台使用当前 Chrome 中已保存的账号和分析。</p>
+          <button class="connect" type="button" data-connect="accounts">连接本机账号库</button>
+        </div>
+      </div>
+      <iframe title="对标账号库" referrerpolicy="no-referrer" hidden></iframe>
+    </section>
+    <section id="video" role="tabpanel" aria-labelledby="video-tab" hidden>
+      <div class="connection" data-connection>
+        <div class="connection-copy">
+          <h2>连接爆款拆解台</h2>
+          <p role="status">先启动这台电脑上的爆款视频拆解工作台。</p>
+          <button class="connect" type="button" data-connect="video">连接本机拆解台</button>
+          <a class="original" href="http://127.0.0.1:4317/" target="_blank" rel="noopener noreferrer">检查本机工作台</a>
+        </div>
+      </div>
+      <iframe title="爆款视频拆解工作台" allow="clipboard-write; loopback-network; local-network-access" referrerpolicy="no-referrer" hidden></iframe>
+    </section>
+    <section id="story" role="tabpanel" aria-labelledby="story-tab">
+      <iframe title="分镜台" src="https://angiechenqiurong-svg.github.io/koubo-storyboard/"></iframe>
+    </section>
+  </main>
+</body>
+</html>

@@ -1,5 +1,3 @@
-const extensionId = 'cldfmkmoeiodmabgocfbghjffhkocfne';
-const extensionOrigin = 'chrome-extension://' + extensionId;
 const localOrigin = 'http://127.0.0.1:4317';
 const tools = [...document.querySelectorAll('[role="tab"]')];
 const panels = new Map(tools.map(tab => [
@@ -43,7 +41,7 @@ function reportFailure(name) {
   const connection = connections.get(name);
   connection.button.disabled = false;
   connection.notice.textContent = name === 'accounts'
-    ? '请在 Chrome 启用「爆款视频拆解工作台」0.5.5 或更新版本，再点连接。'
+    ? '请启动本机工作台，并在 Chrome 启用「爆款视频拆解工作台」0.5.6 或更新版本。'
     : '没连到本机拆解台。请确认工作台已启动，并在 Chrome 提示时允许访问本机。';
 }
 
@@ -67,38 +65,23 @@ connections.get('video').button.addEventListener('click', () => {
 
 connections.get('accounts').button.addEventListener('click', () => {
   const connection = connections.get('accounts');
-  const runtime = globalThis.chrome?.runtime;
-  if (!runtime?.sendMessage) {
-    reportFailure('accounts');
-    return;
-  }
   connection.button.disabled = true;
   connection.notice.textContent = '正在读取当前 Chrome 中的账号库…';
-  try {
-    runtime.sendMessage(extensionId, {type: 'ip-workbench:open-accounts'}, response => {
-      if (runtime.lastError || !response?.ok || !URL.canParse(response.frame)) {
-        reportFailure('accounts');
-        return;
-      }
-      const url = new URL(response.frame);
-      if (url.protocol !== 'chrome-extension:' || url.hostname !== extensionId ||
-          url.pathname !== '/account-library.html' || !url.searchParams.has('workspace')) {
-        reportFailure('accounts');
-        return;
-      }
-      attach('accounts', url.href);
-    });
-  } catch {
-    reportFailure('accounts');
-  }
+  attach('accounts', localOrigin + '/ip-accounts/');
 });
 
 window.addEventListener('message', event => {
-  const name = event.origin === localOrigin && event.data?.type === 'ip-workbench:video-ready' ? 'video'
-    : event.origin === extensionOrigin && event.data?.type === 'ip-workbench:accounts-ready' ? 'accounts' : null;
+  if (event.origin !== localOrigin) return;
+  const type = event.data?.type;
+  const name = type === 'ip-workbench:video-ready' ? 'video'
+    : ['ip-workbench:accounts-ready', 'ip-workbench:accounts-unavailable'].includes(type) ? 'accounts' : null;
   const connection = connections.get(name);
   if (!connection || event.source !== connection.frame.contentWindow) return;
   clearTimeout(connection.timer);
+  if (type === 'ip-workbench:accounts-unavailable') {
+    reportFailure(name);
+    return;
+  }
   connection.placeholder.closest('[role="tabpanel"]').classList.remove('pending-frame');
   connection.placeholder.hidden = true;
   connection.frame.hidden = false;

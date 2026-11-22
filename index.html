@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>IP工作台</title>
   <link rel="icon" href="./favicon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="./workspace.css?v=2">
-  <script type="module" src="./workspace.mjs?v=2"></script>
+  <link rel="stylesheet" href="./workspace.css?v=3">
+  <script type="module" src="./workspace.mjs?v=3"></script>
 </head>
 <body>
   <header class="workspace-bar">
@@ -26,7 +26,7 @@
           <button class="connect" type="button" data-connect="accounts">连接本机账号库</button>
         </div>
       </div>
-      <iframe title="对标账号库" referrerpolicy="no-referrer" hidden></iframe>
+      <iframe title="对标账号库" allow="clipboard-write; loopback-network; local-network-access" referrerpolicy="no-referrer" hidden></iframe>
     </section>
     <section id="video" role="tabpanel" aria-labelledby="video-tab" hidden>
       <div class="connection" data-connection>

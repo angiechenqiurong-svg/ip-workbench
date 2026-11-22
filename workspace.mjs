@@ -7,9 +7,10 @@ const connections = new Map([...document.querySelectorAll('[data-connect]')].map
   const panel = panels.get(button.dataset.connect);
   return [button.dataset.connect, {
     button, frame: panel.querySelector('iframe'), notice: panel.querySelector('[role="status"]'),
-    placeholder: panel.querySelector('[data-connection]'), timer: null,
+    placeholder: panel.querySelector('[data-connection]'), timer: null, ready: false,
   }];
 }));
+let pendingVideo = null;
 
 function choose(name, updateAddress = true) {
   if (!panels.has(name)) name = 'story';
@@ -39,6 +40,8 @@ for (const [index, tab] of tools.entries()) {
 
 function reportFailure(name) {
   const connection = connections.get(name);
+  clearTimeout(connection.timer);
+  connection.timer = null;
   connection.button.disabled = false;
   connection.notice.textContent = name === 'accounts'
     ? '请启动本机工作台，并在 Chrome 启用「爆款视频拆解工作台」0.5.6 或更新版本。'
@@ -47,6 +50,7 @@ function reportFailure(name) {
 
 function attach(name, url) {
   const connection = connections.get(name);
+  connection.ready = false;
   clearTimeout(connection.timer);
   connection.timer = setTimeout(() => reportFailure(name), 12000);
   if (name === 'accounts') {
@@ -56,12 +60,13 @@ function attach(name, url) {
   connection.frame.src = url;
 }
 
-connections.get('video').button.addEventListener('click', () => {
+function connectVideo() {
   const connection = connections.get('video');
   connection.button.disabled = true;
   connection.notice.textContent = '正在连接这台电脑上的爆款拆解台…';
   attach('video', localOrigin + '/ip-video');
-});
+}
+connections.get('video').button.addEventListener('click', connectVideo);
 
 connections.get('accounts').button.addEventListener('click', () => {
   const connection = connections.get('accounts');
@@ -70,14 +75,34 @@ connections.get('accounts').button.addEventListener('click', () => {
   attach('accounts', localOrigin + '/ip-accounts/');
 });
 
+function showReferenceVideo(url) {
+  pendingVideo = url;
+  choose('video');
+  const connection = connections.get('video');
+  if (connection.ready) sendReferenceVideo(connection);
+  else if (connection.timer === null) connectVideo();
+}
+
+function sendReferenceVideo(connection) {
+  if (!pendingVideo) return;
+  connection.frame.contentWindow.postMessage({ type: 'ip-workbench:prefill-video', url: pendingVideo }, localOrigin);
+  pendingVideo = null;
+}
+
 window.addEventListener('message', event => {
   if (event.origin !== localOrigin) return;
   const type = event.data?.type;
+  if (type === 'ip-workbench:open-video') {
+    if (event.source === connections.get('accounts').frame.contentWindow &&
+        typeof event.data.url === 'string' && event.data.url.length <= 512) showReferenceVideo(event.data.url);
+    return;
+  }
   const name = type === 'ip-workbench:video-ready' ? 'video'
     : ['ip-workbench:accounts-ready', 'ip-workbench:accounts-unavailable'].includes(type) ? 'accounts' : null;
   const connection = connections.get(name);
   if (!connection || event.source !== connection.frame.contentWindow) return;
   clearTimeout(connection.timer);
+  connection.timer = null;
   if (type === 'ip-workbench:accounts-unavailable') {
     reportFailure(name);
     return;
@@ -85,6 +110,11 @@ window.addEventListener('message', event => {
   connection.placeholder.closest('[role="tabpanel"]').classList.remove('pending-frame');
   connection.placeholder.hidden = true;
   connection.frame.hidden = false;
+  connection.ready = true;
+  if (name === 'video') sendReferenceVideo(connection);
+  if (name === 'accounts') {
+    connection.frame.contentWindow.postMessage({ type: 'ip-workbench:enable-breakdown-links' }, localOrigin);
+  }
 });
 
 window.addEventListener('hashchange', () => choose(location.hash.slice(1), false));
